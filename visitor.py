@@ -27,10 +27,13 @@ class TextNode(TreeNode):
     def to_string(self, level):
         indent = level * 2
         indent *= ' '
-        str = indent + 'rules:\n'
+        str1 = ''
+        i = 1
         for rule in self.rules:
-            str += rule.to_string(level + 1)
-        return str
+            str1 += 'rule ' + str(i) + ':\n'
+            str1 += rule.to_string(level + 1)
+            str1 += '------------------'
+        return str1
 
 class RuleNode(TreeNode):
     level = 0;
@@ -55,7 +58,7 @@ class RuleNode(TreeNode):
         str1 += indent + 'subrules:\n'
         for rule in self.subrules:
             str1 += rule.to_string(level + 1)
-        str1 += indent + 'definiton:\n' + self.definition.to_string(level + 1) + '\n'
+        str1 += indent + 'definiton:\n' + self.definition.to_string(level + 1)
         return str1
 
 
@@ -100,9 +103,9 @@ class AltNode(TreeNode):
         indent = level * 2
         indent *= ' '
         str = indent + 'left:\n'
-        str += self.left.to_string(level + 1) + '\n'
+        str += self.left.to_string(level + 1)
         str += indent + 'right:\n'
-        str += self.right.to_string(level + 1) + '\n'
+        str += self.right.to_string(level + 1)
         return str
 
 class ConcatNode(TreeNode):
@@ -118,9 +121,9 @@ class ConcatNode(TreeNode):
         indent = level * 2
         indent *= ' '
         str = indent + 'left:\n'
-        str += self.left.to_string(level + 1) + '\n'
+        str += self.left.to_string(level + 1)
         str += indent + 'right:\n'
-        str += self.right.to_string(level + 1) + '\n'
+        str += self.right.to_string(level + 1)
         return str
 
 class AtomNode(TreeNode):
@@ -130,7 +133,7 @@ class AtomNode(TreeNode):
     def to_string(self, level):
         indent = level * 2
         indent *= ' '
-        str = indent + self.text + '\n'
+        str = indent + self.text.strip() + '\n'
         return str
 
 
@@ -145,7 +148,7 @@ class EvalVisitor(ebnfVisitor):
         level = 0
         if not ctx.indent is None:
             level = len(ctx.indent) / 2
-        left = RuleNode(ctx.text, level, ctx.name.text, self.visit(ctx.left))
+        left = RuleNode(ctx.getText, level, ctx.name.text, self.visit(ctx.left))
         right = self.visit(ctx.right)
         right.append(left)
         return right;
@@ -154,12 +157,12 @@ class EvalVisitor(ebnfVisitor):
         return []
 
     def visitStarExpr(self, ctx):
-        return OptNode(ctx.text, self.visit(ctx.expr))
+        return OptNode(ctx.getText, self.visit(ctx.expr))
 
     def visitAltExpr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
-        return ConcatNode(ctx.text, left, right)
+        return ConcatNode(ctx.getText, left, right)
 
     def visitAtomExpr(self, ctx):
         return AtomNode(ctx.getText())
@@ -169,12 +172,12 @@ class EvalVisitor(ebnfVisitor):
     #     return self.visitChildren(ctx)
 
     def visitOptExpr(self, ctx):
-        return OptNode(ctx.text, self.visit(ctx.expr))
+        return OptNode(ctx.getText, self.visit(ctx.expr))
 
     def visitConcatExpr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
-        return ConcatNode(ctx.text, left, right)
+        return ConcatNode(ctx.getText, left, right)
 
     
 def main():

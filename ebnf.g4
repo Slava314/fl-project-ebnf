@@ -1,7 +1,7 @@
 grammar ebnf;
     start: text ;
 
-    text: indent=SP* name=WORD SP* '->' right=expr ENDL text #ruleText
+    text: indent=SP* name=WORD SP* '->' left=expr ENDL right=text #ruleText
           | END #endText
           ;
 
@@ -10,7 +10,7 @@ grammar ebnf;
           | left=expr SP* ALT SP* right=expr           #altExpr
           | left=expr SP* CONCAT SP* right=expr       #concatExpr
           | '(' expr ')'                      #parenExpr
-          | SP* atom SP*                          #atomExpr
+          | SP* s=atom SP*                          #atomExpr
           ;
 
     atom: WORD #wordAtom
