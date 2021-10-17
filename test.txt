@@ -1,4 +1,5 @@
-digit -> "1";
-  digit_1   -> *"2"| "4"|"8";
-digit_2 -> ?*"1";
+digit -> "1"|"2";
+natural number -> *"a";
+a10 -> digit;
+qwerty -> *("a");
 EOF

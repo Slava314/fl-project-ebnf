@@ -25,6 +25,7 @@ class TextNode(TreeNode):
     #     self.rules.append(new_rule)
 
     def to_string(self, level):
+        self.rules.reverse()
         indent = level * 2
         indent *= ' '
         str1 = ''
@@ -32,7 +33,8 @@ class TextNode(TreeNode):
         for rule in self.rules:
             str1 += 'rule ' + str(i) + ':\n'
             str1 += rule.to_string(level + 1)
-            str1 += '------------------'
+            str1 += '------------------\n'
+            i += 1
         return str1
 
 class RuleNode(TreeNode):
@@ -72,8 +74,8 @@ class StarNode(TreeNode):
     def to_string(self, level):
         indent = level * 2
         indent *= ' '
-        str = indent + 'expression:\n'
-        str += self.expr.to_string(level + 1) + '\n'
+        str = indent + 'star expression:\n'
+        str += self.expr.to_string(level + 1)
         return str
 
 class OptNode(TreeNode):
@@ -86,8 +88,8 @@ class OptNode(TreeNode):
     def to_string(self, level):
         indent = level * 2
         indent *= ' '
-        str = indent + 'expression:\n'
-        str += self.expr.to_string(level + 1) + '\n'
+        str = indent + 'optional expression:\n'
+        str += self.expr.to_string(level + 1)
         return str
 
 class AltNode(TreeNode):
@@ -102,7 +104,8 @@ class AltNode(TreeNode):
     def to_string(self, level):
         indent = level * 2
         indent *= ' '
-        str = indent + 'left:\n'
+        str = indent + "alternative:\n"
+        str += indent + 'left:\n'
         str += self.left.to_string(level + 1)
         str += indent + 'right:\n'
         str += self.right.to_string(level + 1)
@@ -120,7 +123,8 @@ class ConcatNode(TreeNode):
     def to_string(self, level):
         indent = level * 2
         indent *= ' '
-        str = indent + 'left:\n'
+        str = indent + "concatination:\n"
+        str += indent + 'left:\n'
         str += self.left.to_string(level + 1)
         str += indent + 'right:\n'
         str += self.right.to_string(level + 1)
@@ -157,22 +161,21 @@ class EvalVisitor(ebnfVisitor):
         return []
 
     def visitStarExpr(self, ctx):
-        return OptNode(ctx.getText, self.visit(ctx.expr))
+        return StarNode(ctx.getText, self.visit(ctx.left))
 
     def visitAltExpr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
-        return ConcatNode(ctx.getText, left, right)
+        return AltNode(ctx.getText, left, right)
 
     def visitAtomExpr(self, ctx):
         return AtomNode(ctx.getText())
 
-    # def visitParenExpr(self, ctx):
-    #     print("visitParenExpr",ctx.getText())
-    #     return self.visitChildren(ctx)
+    def visitParenExpr(self, ctx):
+        return self.visit(ctx.left)
 
     def visitOptExpr(self, ctx):
-        return OptNode(ctx.getText, self.visit(ctx.expr))
+        return OptNode(ctx.getText, self.visit(ctx.left))
 
     def visitConcatExpr(self, ctx):
         left = self.visit(ctx.left)
