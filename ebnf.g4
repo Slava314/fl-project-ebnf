@@ -1,16 +1,16 @@
 grammar ebnf;
     start: text ;
 
-    text: indent=SP* WORD SP* '->' right=expr ENDL text #ruleExpr
-          | EOF #endExpr
+    text: indent=SP* name=WORD SP* '->' right=expr ENDL text #ruleText
+          | END #endText
           ;
 
-    expr:  left=expr ALT right=expr           #altExpr
-          | left=expr CONCAT right=expr       #concatExpr
+    expr: SP* STAR expr                         #starExpr
+          | SP* OPT expr                          #optExpr
+          | left=expr SP* ALT SP* right=expr           #altExpr
+          | left=expr SP* CONCAT SP* right=expr       #concatExpr
           | '(' expr ')'                      #parenExpr
-          | STAR expr                         #starExpr
-          | OPT expr                          #optExpr
-          | atom                              #atomExpr
+          | SP* atom SP*                          #atomExpr
           ;
 
     atom: WORD #wordAtom
@@ -39,7 +39,7 @@ grammar ebnf;
 
     SP: ' ' ;
 
-    ENDL: ';\n' ;
+    ENDL: ';' ;
 
     WS: [\t\r\n]+ -> skip ;
 
