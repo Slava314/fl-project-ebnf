@@ -1,3 +1,4 @@
+from typing_extensions import ParamSpecArgs
 from antlr4 import *
 from ebnfLexer import ebnfLexer
 from ebnfVisitor import ebnfVisitor
@@ -8,6 +9,68 @@ from pprint import pprint
 
 import codecs
 import sys
+
+class TreeNode:
+    text = ''
+    def ToString():
+         pass
+
+class TextNode(TreeNode):
+    rules = []
+
+    def __init__(self, text):
+        self.text = text
+
+    def add_rule(self, new_rule):
+        self.rules.append(new_rule)
+
+class RuleNode(TreeNode):
+    level = 0;
+    subrules = []
+    name = ''
+    definition = TreeNode()
+
+    def __init__(self, text, level, name):
+        self.text = text
+        self.level = level
+        self.name = name
+
+    def add_subrule(self, new_rule):
+        self.subrules.append(new_rule)
+
+
+class StarNode(TreeNode):
+    expr = TreeNode()
+
+    def __init__(self, text, expr):
+        self.text = text
+        self.expr = expr
+
+class OptNode(TreeNode):
+    expr = TreeNode()
+
+    def __init__(self, text, expr):
+        self.text = text
+        self.expr = expr
+
+class AltNode(TreeNode):
+    left = TreeNode()
+    right = TreeNode()
+
+    def __init__(self, text, left, right):
+        self.text = text
+        self.left = left
+        self.right = right
+
+class ConcatNode(TreeNode):
+    left = TreeNode()
+    right = TreeNode()
+
+    def __init__(self, text, left, right):
+        self.text = text
+        self.left = left
+        self.right = right
+
 
 class EvalVisitor(ebnfVisitor):
 
