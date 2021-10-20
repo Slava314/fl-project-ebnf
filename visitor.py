@@ -1,4 +1,5 @@
 from antlr4 import *
+from antlr4.error.ErrorListener import *
 from ebnfLexer import ebnfLexer
 from ebnfVisitor import ebnfVisitor
 from ebnfParser import ebnfParser
@@ -20,12 +21,24 @@ class TextNode(TreeNode):
     def __init__(self, text, rules):
         self.text = text
         self.rules = rules
+        self.rules.reverse()
 
-    # def add_rule(self, new_rule):
-    #     self.rules.append(new_rule)
+    def fix_subrules(self):
+        new_rules = []
+        for rule in self.rules:
+            if rule.level > 0:
+                new_rules[-1].add_subrule(rule)
+            else:
+                new_rules.append(rule)
+                new_rules[-1].subrules = []
+        self.rules = new_rules
+        for rule in self.rules:
+            rule.fix_subrules()
+
+    def check_errors(self):
+        pass
 
     def to_string(self, level):
-        self.rules.reverse()
         indent = level * 2
         indent *= ' '
         str1 = ''
@@ -51,6 +64,20 @@ class RuleNode(TreeNode):
 
     def add_subrule(self, new_rule):
         self.subrules.append(new_rule)
+        self.subrules[-1].subrules = []
+
+
+    def fix_subrules(self):
+        new_rules = []
+        for rule in self.subrules:
+            if rule.level > self.level + 1:
+                new_rules[-1].add_subrule(rule)
+            else:
+                new_rules.append(rule)
+                new_rules[-1].subrules = []
+        self.subrules = new_rules
+        for rule in self.subrules:
+            rule.fix_subrules()
 
     def to_string(self, level):
         indent = ''
@@ -141,18 +168,33 @@ class AtomNode(TreeNode):
         return str
 
 
+class MyErrorListener(ErrorListener):
+    def __init__(self, fileName, inputFile):
+        self.fileName = fileName
+        self.inpFile = inputFile
+
+    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+        strings = self.inpFile.splitlines()
+        print("Error! Incorrect input in {}:{}:{}".format(self.fileName, str(line), str(column)))
+        print("  " + strings[line - 1])
+        print("  " + column * " " + "^")
+        sys.exit(3)
+    
+
 
 class EvalVisitor(ebnfVisitor):
 
     def visitStart(self, ctx):
-        return TextNode(ctx.text, self.visitChildren(ctx))
+        return TextNode(ctx.getText(), self.visitChildren(ctx))
 
     def visitRuleText(self, ctx):
         lst = []
         level = 0
         if not ctx.indent is None:
-            level = len(ctx.indent) / 2
-        left = RuleNode(ctx.getText, level, ctx.name.text, self.visit(ctx.left))
+            level = int(len(ctx.indent.text) / 2)
+        rule_text = ctx.getText()
+        rule_text = rule_text[:rule_text.find(';')]
+        left = RuleNode(rule_text, level, ctx.name.text, self.visit(ctx.left))
         right = self.visit(ctx.right)
         right.append(left)
         return right;
@@ -161,12 +203,12 @@ class EvalVisitor(ebnfVisitor):
         return []
 
     def visitStarExpr(self, ctx):
-        return StarNode(ctx.getText, self.visit(ctx.left))
+        return StarNode(ctx.getText(), self.visit(ctx.left))
 
     def visitAltExpr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
-        return AltNode(ctx.getText, left, right)
+        return AltNode(ctx.getText(), left, right)
 
     def visitAtomExpr(self, ctx):
         return AtomNode(ctx.getText())
@@ -175,21 +217,29 @@ class EvalVisitor(ebnfVisitor):
         return self.visit(ctx.left)
 
     def visitOptExpr(self, ctx):
-        return OptNode(ctx.getText, self.visit(ctx.left))
+        return OptNode(ctx.getText(), self.visit(ctx.left))
 
     def visitConcatExpr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
-        return ConcatNode(ctx.getText, left, right)
+        return ConcatNode(ctx.getText(), left, right)
 
     
 def main():
-    with open(sys.argv[1]) as file:
-        lexer = ebnfLexer(InputStream(file.read()))
+    with open('test.txt') as file:
+        input = file.read()
+        lexer = ebnfLexer(InputStream(input))
+        lexer.removeErrorListeners()
+        lexer.addErrorListener(MyErrorListener(sys.argv[1], input))
         stream = CommonTokenStream(lexer)
         parser = ebnfParser(stream)
+        parser.removeErrorListeners()
+        parser.addErrorListener(MyErrorListener(sys.argv[1], input))
         tree = parser.start()
-        print(EvalVisitor().visit(tree).to_string(0))
+        abs_tree = EvalVisitor().visit(tree)
+        abs_tree.fix_subrules()
+        # abs_tree.check_errors()
+        print(abs_tree.to_string(0))
         
     
 

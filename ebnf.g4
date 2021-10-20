@@ -1,7 +1,8 @@
 grammar ebnf;
     start: text ;
 
-    text: indent=SP* name=WORD SP* '->' left=expr ENDL right=text #ruleText
+    text: indent=SP_M name=WORD SP* '->' left=expr ENDL right=text #ruleText
+          | name=WORD SP* '->' left=expr ENDL right=text #ruleText
           | END #endText
           ;
 
@@ -9,7 +10,7 @@ grammar ebnf;
           | SP* OPT left=expr                         #optExpr
           | left=expr SP* ALT SP* right=expr          #altExpr
           | left=expr SP* CONCAT SP* right=expr       #concatExpr
-          | '(' left=expr ')'                              #parenExpr
+          | '(' left=expr ')'                         #parenExpr
           | SP* s=atom SP*                            #atomExpr
           ;
 
@@ -40,6 +41,8 @@ grammar ebnf;
     WORD: [a-zA-Z][a-zA-Z0-9_ ]*[a-zA-Z0-9_] ;
 
     SP: ' ' ;
+
+    SP_M: ' '' '* ;
 
     ENDL: ';' ;
 
