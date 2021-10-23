@@ -18,9 +18,9 @@ grammar ebnf;
           | CHR  #chrAtom
           ;
 
-    BlockComment: '#{' .*? '}#' -> skip;
+    BlockComment: ' '*'#{' .*? '}#' -> skip;
 
-    LineComment: '#' ~ [\r\n]* -> skip;
+    LineComment: ' '*'%' ~ [\r\n]* -> skip;
 
     END: 'EOF' ;
 
