@@ -42,7 +42,7 @@ grammar ebnf;
 
     SP: ' ' ;
 
-    SP_M: ' '' '* ;
+    SP_M: '  ''  '* ;
 
     ENDL: ';' ;
 
