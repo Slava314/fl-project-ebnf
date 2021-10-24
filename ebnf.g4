@@ -1,8 +1,8 @@
 grammar ebnf;
     start: text ;
 
-    text: indent=SP_M name=WORD SP* '->' left=expr ENDL right=text #ruleText
-          | name=WORD SP* '->' left=expr ENDL right=text #ruleText
+    text: indent=SP_M name=WORD SP* '->' left=expr ENDL SP* NEW_L right=text #ruleText
+          | name=WORD SP* '->' left=expr ENDL SP* NEW_L right=text #ruleText
           | END #endText
           ;
 
@@ -42,8 +42,10 @@ grammar ebnf;
 
     SP: ' ' ;
 
-    SP_M: '  ''  '* ;
+    SP_M: ' '' '* ;
 
     ENDL: ';' ;
 
-    WS: [\t\r\n]+ -> skip ;
+    NEW_L: [\r\n]+;
+
+    WS: [\t]+ -> skip ;

@@ -10,6 +10,14 @@ from pprint import pprint
 import codecs
 import sys
 
+
+def print_error_msg(line, column, str1, msg = ''):
+    print("Error! Incorrect input in line {}:{}".format(str(line), str(column)))
+    print("  " + str1)
+    print("  " + column * " " + "^")
+    print(msg)
+
+
 class TreeNode:
     text = ''
     def to_string(self, level):
@@ -27,6 +35,9 @@ class TextNode(TreeNode):
         new_rules = []
         for rule in self.rules:
             if rule.level > 0:
+                if not new_rules:
+                    print_error_msg(rule.indent_token.line, rule.indent_token.column, rule.text, msg='Wrong level of nesting')
+                    sys.exit(1)
                 new_rules[-1].add_subrule(rule)
             else:
                 new_rules.append(rule)
@@ -39,8 +50,6 @@ class TextNode(TreeNode):
         pass
 
     def to_string(self, level):
-        indent = level * 2
-        indent *= ' '
         str1 = ''
         i = 1
         for rule in self.rules:
@@ -55,10 +64,16 @@ class RuleNode(TreeNode):
     subrules = []
     name = ''
     definition = TreeNode()
+    indent_token = None
 
-    def __init__(self, text, level, name, definition):
+    def __init__(self, text, name, indent_token, definition):
         self.text = text
-        self.level = level
+        self.indent_token = indent_token
+        if self.indent_token:
+            if len(self.indent_token.text) % 2 == 1:
+                print_error_msg(self.indent_token.line, self.indent_token.column, text, msg='Wrong number of spaces')
+                sys.exit(1)
+            self.level = int(len(self.indent_token.text) / 2)
         self.name = name
         self.definition = definition
 
@@ -71,6 +86,9 @@ class RuleNode(TreeNode):
         new_rules = []
         for rule in self.subrules:
             if rule.level > self.level + 1:
+                if not new_rules:
+                    print_error_msg(rule.indent_token.line, rule.indent_token.column, rule.text, msg='Wrong level of nesting')
+                    sys.exit(1)
                 new_rules[-1].add_subrule(rule)
             else:
                 new_rules.append(rule)
@@ -80,9 +98,7 @@ class RuleNode(TreeNode):
             rule.fix_subrules()
 
     def to_string(self, level):
-        indent = ''
-        for i in range(level):
-            indent += '  '
+        indent = '  ' * level
         str1 = indent + 'name: ' + str(self.name) + '\n'
         str1 += indent + 'subrules:\n'
         for rule in self.subrules:
@@ -99,8 +115,7 @@ class StarNode(TreeNode):
         self.expr = expr
 
     def to_string(self, level):
-        indent = level * 2
-        indent *= ' '
+        indent = '  ' * level
         str = indent + 'star expression:\n'
         str += self.expr.to_string(level + 1)
         return str
@@ -113,8 +128,7 @@ class OptNode(TreeNode):
         self.expr = expr
 
     def to_string(self, level):
-        indent = level * 2
-        indent *= ' '
+        indent = '  ' * level
         str = indent + 'optional expression:\n'
         str += self.expr.to_string(level + 1)
         return str
@@ -129,8 +143,7 @@ class AltNode(TreeNode):
         self.right = right
 
     def to_string(self, level):
-        indent = level * 2
-        indent *= ' '
+        indent = '  ' * level
         str = indent + "alternative:\n"
         str += indent + 'left:\n'
         str += self.left.to_string(level + 1)
@@ -148,8 +161,7 @@ class ConcatNode(TreeNode):
         self.right = right
 
     def to_string(self, level):
-        indent = level * 2
-        indent *= ' '
+        indent = '  ' * level
         str = indent + "concatination:\n"
         str += indent + 'left:\n'
         str += self.left.to_string(level + 1)
@@ -175,10 +187,8 @@ class MyErrorListener(ErrorListener):
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         strings = self.inpFile.splitlines()
-        print("Error! Incorrect input in {}:{}:{}".format(self.fileName, str(line), str(column)))
-        print("  " + strings[line - 1])
-        print("  " + column * " " + "^")
-        sys.exit(3)
+        print_error_msg(line ,column, strings[line - 1])
+        sys.exit(1)
     
 
 
@@ -188,13 +198,9 @@ class EvalVisitor(ebnfVisitor):
         return TextNode(ctx.getText(), self.visitChildren(ctx))
 
     def visitRuleText(self, ctx):
-        lst = []
-        level = 0
-        if not ctx.indent is None:
-            level = int(len(ctx.indent.text) / 2)
         rule_text = ctx.getText()
         rule_text = rule_text[:rule_text.find(';')]
-        left = RuleNode(rule_text, level, ctx.name.text, self.visit(ctx.left))
+        left = RuleNode(rule_text, ctx.name.text, ctx.indent, self.visit(ctx.left))
         right = self.visit(ctx.right)
         right.append(left)
         return right;
@@ -226,20 +232,29 @@ class EvalVisitor(ebnfVisitor):
 
     
 def main():
-    with open('test.txt') as file:
-        input = file.read()
-        lexer = ebnfLexer(InputStream(input))
-        lexer.removeErrorListeners()
-        lexer.addErrorListener(MyErrorListener(sys.argv[1], input))
-        stream = CommonTokenStream(lexer)
-        parser = ebnfParser(stream)
-        parser.removeErrorListeners()
-        parser.addErrorListener(MyErrorListener(sys.argv[1], input))
-        tree = parser.start()
-        abs_tree = EvalVisitor().visit(tree)
-        abs_tree.fix_subrules()
-        # abs_tree.check_errors()
-        print(abs_tree.to_string(0))
+
+    if (len(sys.argv) == 1): 
+        print("Error! No input file")
+        sys.exit(1)
+    try:
+        with open(sys.argv[1], 'r') as f:
+            input = f.read()
+    except Exception:
+        print("Can't open file {} for reading".format(sys.argv[1]))
+        sys.exit(1)
+
+    lexer = ebnfLexer(InputStream(input))
+    # lexer.removeErrorListeners()
+    # lexer.addErrorListener(MyErrorListener(sys.argv[1], input))
+    stream = CommonTokenStream(lexer)
+    parser = ebnfParser(stream)
+    # parser.removeErrorListeners()
+    # parser.addErrorListener(MyErrorListener(sys.argv[1], input))
+    tree = parser.start()
+    abs_tree = EvalVisitor().visit(tree)
+    abs_tree.fix_subrules()
+    abs_tree.check_errors()
+    print(abs_tree.to_string(0))
         
     
 
