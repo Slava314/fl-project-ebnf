@@ -47,7 +47,16 @@ class TextNode(TreeNode):
             rule.fix_subrules()
 
     def check_errors(self):
-        pass
+        previous_rules = []
+        for rule in self.rules:
+            subrules_names = rule.check_errors()
+            rules_in_def = rule.definition.get_rules_from_expr()
+            for used in rules_in_def:
+                txt = used.text
+                if not txt in subrules_names and not txt in previous_rules:
+                    print_error_msg(used.line, used.column, rule.text, msg="This rule isn't defined")
+                    sys.exit(1)
+            previous_rules.append(rule.name)
 
     def to_string(self, level):
         str1 = ''
@@ -97,6 +106,22 @@ class RuleNode(TreeNode):
         for rule in self.subrules:
             rule.fix_subrules()
 
+    def check_errors(self):
+        previous_subrules = []
+        subrules_names = []
+        for rule in self.subrules:
+            new_subrules_names = rule.check_errors()
+            rules_in_def = rule.definition.get_rules_from_expr()
+            for used in rules_in_def:
+                txt = used.text
+                if not txt in new_subrules_names and not txt in previous_subrules:
+                    print_error_msg(used.line, used.column, rule.text, msg="This rule isn't defined")
+                    sys.exit(1)
+            previous_subrules.append(rule.name)
+            subrules_names += new_subrules_names
+
+        return previous_subrules + subrules_names
+
     def to_string(self, level):
         indent = '  ' * level
         str1 = indent + 'name: ' + str(self.name) + '\n'
@@ -114,6 +139,9 @@ class StarNode(TreeNode):
         self.text = text
         self.expr = expr
 
+    def get_rules_from_expr(self):
+        return self.expr.get_rules_from_expr()
+
     def to_string(self, level):
         indent = '  ' * level
         str = indent + 'star expression:\n'
@@ -126,6 +154,9 @@ class OptNode(TreeNode):
     def __init__(self, text, expr):
         self.text = text
         self.expr = expr
+
+    def get_rules_from_expr(self):
+        return self.expr.get_rules_from_expr()
 
     def to_string(self, level):
         indent = '  ' * level
@@ -141,6 +172,9 @@ class AltNode(TreeNode):
         self.text = text
         self.left = left
         self.right = right
+
+    def get_rules_from_expr(self):
+        return self.left.get_rules_from_expr() + self.right.get_rules_from_expr()
 
     def to_string(self, level):
         indent = '  ' * level
@@ -160,6 +194,9 @@ class ConcatNode(TreeNode):
         self.left = left
         self.right = right
 
+    def get_rules_from_expr(self):
+        return self.left.get_rules_from_expr() + self.right.get_rules_from_expr()
+
     def to_string(self, level):
         indent = '  ' * level
         str = indent + "concatination:\n"
@@ -170,8 +207,15 @@ class ConcatNode(TreeNode):
         return str
 
 class AtomNode(TreeNode):
-    def __init__(self, text):
+    token = None
+    def __init__(self, text, token):
         self.text = text
+        self.token = token
+
+    def get_rules_from_expr(self):
+        if self.token:
+            return [self.token.word]
+        return []
 
     def to_string(self, level):
         indent = level * 2
@@ -189,7 +233,8 @@ class MyErrorListener(ErrorListener):
         strings = self.inpFile.splitlines()
         print_error_msg(line ,column, strings[line - 1])
         sys.exit(1)
-    
+
+
 
 
 class EvalVisitor(ebnfVisitor):
@@ -217,7 +262,13 @@ class EvalVisitor(ebnfVisitor):
         return AltNode(ctx.getText(), left, right)
 
     def visitAtomExpr(self, ctx):
-        return AtomNode(ctx.getText())
+        return self.visit(ctx.s)
+        
+    def visitWordAtom(self, ctx):
+        return AtomNode(ctx.getText(), ctx)
+
+    def visitChrAtom(self, ctx):
+        return AtomNode(ctx.getText(), None)
 
     def visitParenExpr(self, ctx):
         return self.visit(ctx.left)
@@ -244,12 +295,12 @@ def main():
         sys.exit(1)
 
     lexer = ebnfLexer(InputStream(input))
-    # lexer.removeErrorListeners()
-    # lexer.addErrorListener(MyErrorListener(sys.argv[1], input))
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(MyErrorListener(sys.argv[1], input))
     stream = CommonTokenStream(lexer)
     parser = ebnfParser(stream)
-    # parser.removeErrorListeners()
-    # parser.addErrorListener(MyErrorListener(sys.argv[1], input))
+    parser.removeErrorListeners()
+    parser.addErrorListener(MyErrorListener(sys.argv[1], input))
     tree = parser.start()
     abs_tree = EvalVisitor().visit(tree)
     abs_tree.fix_subrules()

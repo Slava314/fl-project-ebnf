@@ -1,8 +1,8 @@
 grammar ebnf;
     start: text ;
 
-    text: indent=SP_M name=WORD SP* '->' left=expr ENDL SP* NEW_L right=text #ruleText
-          | name=WORD SP* '->' left=expr ENDL SP* NEW_L right=text #ruleText
+    text: indent=SP_M name=WORD SP* '->' left=expr ENDL SP* NEW_L* right=text #ruleText
+          | name=WORD SP* '->' left=expr ENDL SP* NEW_L* right=text #ruleText
           | END #endText
           ;
 
@@ -14,7 +14,7 @@ grammar ebnf;
           | SP* s=atom SP*                            #atomExpr
           ;
 
-    atom: WORD   #wordAtom
+    atom: word=WORD   #wordAtom
           | CHR  #chrAtom
           ;
 
