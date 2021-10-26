@@ -71,7 +71,7 @@ class TextNode(TreeNode):
         return str1
 
 class RuleNode(TreeNode):
-    level = 0;
+    level = 0
     subrules = []
     name = ''
     definition = TreeNode()
@@ -234,7 +234,7 @@ class MyErrorListener(ErrorListener):
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         strings = self.inpFile.splitlines()
         print_error_msg(line ,column, strings[line - 1])
-        sys.exit(1)
+        sys.exit(1) #may be commented if want to debug and print tokens
 
 
 
@@ -250,7 +250,7 @@ class EvalVisitor(ebnfVisitor):
         left = RuleNode(rule_text, ctx.name.text, ctx.indent, self.visit(ctx.left))
         right = self.visit(ctx.right)
         right.append(left)
-        return right;
+        return right
 
     def visitEndText(self, ctx):
         return []
