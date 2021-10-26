@@ -5,6 +5,7 @@ from antlr4.error.ErrorListener import *
 from ebnfLexer import ebnfLexer
 from ebnfVisitor import ebnfVisitor
 from ebnfParser import ebnfParser
+from ebnfListener import ebnfListener
 from pprint import pprint
 
 
@@ -282,6 +283,22 @@ class EvalVisitor(ebnfVisitor):
         right = self.visit(ctx.right)
         return ConcatNode(ctx.getText(), left, right)
 
+class CommentShifter(ebnfListener):
+    def __init__(self, tokens:CommonTokenStream):
+        super().__init__()
+        self.tokens = tokens
+
+    def exitVarDecl(self, ctx:ebnfParser.ConcatExprContext):
+        startIndex = ctx.start.tokenIndex
+        stopIndex = ctx.stop.tokenIndex
+        cmtChannel = self.tokens.getHiddenTokensToRight(stopIndex, ebnfLexer.WS)
+        if cmtChannel != None:
+            tok = cmtChannel[0]
+            if tok != None:
+                token_array = self.tokens.tokens
+                token_array.insert(startIndex, tok.clone())
+                tok.text = "\n"
+
     
 def main():
 
@@ -308,6 +325,23 @@ def main():
     abs_tree.check_errors()
     print(abs_tree.to_string(0))
         
+    # TESTING
+        # walker = ParseTreeWalker()
+        # collector = CommentShifter(stream)
+        # walker.walk(collector, tree)
+        # lst = stream.getTokens(0, 15)
+        # for x in range(len(lst)): 
+        #     print(lst[x])
+        #     print(lst[x].type)
+        #     print(lst[x].start)
+        #     print(lst[x].stop)
+            # print(lst[x].line)
+            # print(lst[x].text)
+            # print(len(lst[x].text))
+        # print(Trees.toStringTree(tree, None, parser))
+        # prints like this :
+        # (start (text      digit    -> (expr (expr   (atom "1")) | (expr (atom "2"))) ; \n (text EOF)))
+
     
 
 if __name__ == '__main__':
