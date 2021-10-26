@@ -1,0 +1,67 @@
+{
+    "Rule": {
+        "prefix": ["rule"],
+        "body": ["${1:identifier} -> ${2:statement} ;\n"],
+        "description": "function"
+   },
+   "EOF": {
+    "prefix": ["EOF"],
+    "body": ["EOF"],
+    "description": "EOF"
+    },
+    "symbol": {
+        "prefix": ["SY"],
+        "body": ["\"${1:symbol}\""],
+        "description": "EOF"
+    },
+    "comment-single-line": {
+        "prefix": ["comm"],
+        "body": ["# ${1:comment} \n"],
+        "description": "EOF"
+    },
+    "comment-multy-line": {
+        "prefix": ["mcomm"],
+        "body": ["{# \n${1:comment} \n#}"],
+        "description": "EOF"
+    },
+    "make comment from selected text": {
+        "prefix": "make_comm",
+        "body": ["#{ ${1:${TM_SELECTED_TEXT:default}}$0 }#"],
+        "description" : "make comment from selected text"
+     },
+     "alt": {
+        "prefix": "alt",
+        "body": ["($1)|($2)"],
+        "description" : "alt"
+     },
+     "optional-operator": {
+        "prefix": "opt",
+        "body": ["?($1)"],
+        "description" : "optional-operator"
+     },
+     "repetition": {
+        "prefix": "rep",
+        "body": ["*($1)"],
+        "description" : "repetition"
+     },
+     "If": {
+        "prefix": ["if"],
+        "body": ["if (${1:condition})","{","\t${2:statement}","}"],
+        "description": "if"
+    },
+    "If-else": {
+        "prefix": ["if-else"],
+		"body": ["if (${1:condition}){","\t${2:branch1}","}","else","{","\t${3:branch2}","}"],
+		"description": "if-else"
+    },
+    "for":{
+        "prefix": ["for"],
+        "body": ["for (const &${2:element} : ${1:array}) {", "\t$0", "}"],
+        "description": "for loop"
+    },
+    "DUWTD": {
+        "prefix": "DUWTD",
+        "body": ["Do you want to die? ${1|yes,yes|}"],
+        "description" : "rip"
+     }
+} 

@@ -1,9 +1,10 @@
+import sys
+sys.path.insert(1, '../lsp/server/src/antlr')
 from antlr4 import *
 from antlr4.error.ErrorListener import *
 from ebnfLexer import ebnfLexer
 from ebnfVisitor import ebnfVisitor
 from ebnfParser import ebnfParser
-import sys
 from pprint import pprint
 
 

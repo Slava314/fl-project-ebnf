@@ -1,0 +1,62 @@
+{
+	"scopeName": "source.ebnf",
+	"patterns": [
+		{"include": "#arrow"},
+		{"include": "#symbols"},
+		{"include": "#identificator"},
+		{"include": "#digits"},
+		{"include": "#single_line_comments" },
+		{"include": "#multy_line_comments" },
+		{"include": "#open_bracet" },
+		{"include": "#close_bracet" },
+		{"include": "#semicolon" },
+		{"include": "#EOF" },
+		{"include": "#literals" },
+		{"include": "#comment"}
+
+	],
+	"repository": {		
+		"arrow":{
+			"match": "->",
+			"name": "invalid"
+		  },
+		"symbols":{
+			"match": "[,*?|]",
+			"name": "entity.name.type"		
+		},
+		"identificator":{
+			"match": "[a-zA-Z][a-zA-Z0-9_]*",
+			"name": "keyword.letter"	 
+		},
+		"single_line_comments":{
+			"match": "#.*?\n",
+			"name": "punctuation.definition.tag"	 
+		},
+		"multy_line_comments":{
+			"begin":"\\%{",
+      		"end":  "\\}%",
+			"name": "comment"	 
+		},
+		"open_bracet":{
+			"match": "[(]",
+			"name": "string"	 
+		},
+		"close_bracet":{
+			"match": "[)]",
+			"name": "string"	 
+		},
+		"semicolon":{
+			"match": "[;]",
+			"name": "markup.bold"	 
+		},
+		"EOF":{
+			"match": "EOF",
+			"name": "invalid"	 
+		},
+		"literals":{
+			"match": "((?<=')[a-zA-Z0-9!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~](?='))|(' ')",
+			"name": "keyword.control"	 
+		}
+	}
+}
+

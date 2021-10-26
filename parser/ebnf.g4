@@ -2,8 +2,8 @@ grammar ebnf;
     start: text ;
 
     text: indent=SP_M name=WORD SP* '->' left=expr ENDL SP* NEW_L* right=text #ruleText
-          | name=WORD SP* '->' left=expr ENDL SP* NEW_L* right=text #ruleText
-          | END #endText
+          | name=WORD SP* '->' left=expr ENDL SP* NEW_L* right=text           #ruleText
+          | END                                                               #endText
           ;
 
     expr: SP* STAR left=expr                          #starExpr

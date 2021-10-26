@@ -1,0 +1,31 @@
+rule 1:
+  name: digit
+  subrules:
+  definiton:
+    alternative:
+    left:
+      "1"
+    right:
+      "2"
+------------------
+rule 2:
+  name: natural number
+  subrules:
+  definiton:
+    star expression:
+      "a"
+------------------
+rule 3:
+  name: a10
+  subrules:
+  definiton:
+    digit
+------------------
+rule 4:
+  name: qwerty
+  subrules:
+  definiton:
+    star expression:
+      "a"
+------------------
+
