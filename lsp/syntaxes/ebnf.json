@@ -29,12 +29,12 @@
 			"name": "keyword.letter"	 
 		},
 		"single_line_comments":{
-			"match": "#.*?\n",
+			"match": "%.*?\n",
 			"name": "punctuation.definition.tag"	 
 		},
 		"multy_line_comments":{
-			"begin":"\\%{",
-      		"end":  "\\}%",
+			"begin":"\\#{",
+      		"end":  "\\}#",
 			"name": "comment"	 
 		},
 		"open_bracet":{
@@ -54,7 +54,7 @@
 			"name": "invalid"	 
 		},
 		"literals":{
-			"match": "((?<=')[a-zA-Z0-9!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~](?='))|(' ')",
+			"match": "((?<=')[a-zA-Z0-9!\"#$%&'()*+,-./:;<=>?@\\^_`{|}~]*(?='))|(' ')",
 			"name": "keyword.control"	 
 		}
 	}

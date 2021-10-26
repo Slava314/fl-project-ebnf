@@ -1,0 +1,11 @@
+digit -> "1"|"2";
+digit2 -> "2"|"3";
+  digit22 -> "22"|"23";
+  digit23 -> "23"|"24";
+  digit24 -> "24"|"25";
+    digit34 -> "34"|"35";
+    digit35 -> "35"|"36";
+  digit25 -> digit22 | digit24;
+  what000_ -> *("rr");
+  REPEAT -> *(what000_);
+EOF

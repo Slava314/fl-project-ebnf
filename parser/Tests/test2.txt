@@ -1,0 +1,4 @@
+digit -> "1"|"2";
+%THIS IS A COMMENT
+    %THIS IS ALSO A COMMENT
+EOF

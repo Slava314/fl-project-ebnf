@@ -16,12 +16,12 @@
     },
     "comment-single-line": {
         "prefix": ["comm"],
-        "body": ["# ${1:comment} \n"],
+        "body": ["% ${1:comment} \n"],
         "description": "EOF"
     },
     "comment-multy-line": {
         "prefix": ["mcomm"],
-        "body": ["{# \n${1:comment} \n#}"],
+        "body": ["#{ \n${1:comment} \n}#"],
         "description": "EOF"
     },
     "make comment from selected text": {

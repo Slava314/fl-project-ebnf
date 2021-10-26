@@ -1,0 +1,6 @@
+digit -> "1"|"2";
+digit2 -> "2"|"3";
+  REPEAT -> ***("aaaa");
+
+
+EOF

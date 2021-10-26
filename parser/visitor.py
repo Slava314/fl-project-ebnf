@@ -6,6 +6,7 @@ from ebnfLexer import ebnfLexer
 from ebnfVisitor import ebnfVisitor
 from ebnfParser import ebnfParser
 from ebnfListener import ebnfListener
+from antlr4.tree.Trees import Trees
 from pprint import pprint
 
 
@@ -234,7 +235,7 @@ class MyErrorListener(ErrorListener):
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         strings = self.inpFile.splitlines()
         print_error_msg(line ,column, strings[line - 1])
-        sys.exit(1) #may be commented if want to debug and print tokens
+        sys.exit(1)
 
 
 
@@ -266,10 +267,13 @@ class EvalVisitor(ebnfVisitor):
     def visitAtomExpr(self, ctx):
         return self.visit(ctx.s)
         
-    def visitWordAtom(self, ctx):
+    def visitRuleAtom(self, ctx):
         return AtomNode(ctx.getText(), ctx)
 
     def visitChrAtom(self, ctx):
+        return AtomNode(ctx.getText(), None)
+
+    def visitStrAtom(self, ctx):
         return AtomNode(ctx.getText(), None)
 
     def visitParenExpr(self, ctx):
