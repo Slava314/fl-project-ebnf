@@ -1,8 +1,8 @@
 grammar ebnf;
     start: text ;
 
-    text: indent=SP_M name=WORD SP* '->' left=expr ENDL SP* NEW_L* right=text #ruleText
-          | name=WORD SP* '->' left=expr ENDL SP* NEW_L* right=text #ruleText
+    text: indent=SP_M name=RULE SP* '->' left=expr ENDL SP* NEW_L* right=text #ruleText
+          | name=RULE SP* '->' left=expr ENDL SP* NEW_L* right=text #ruleText
           | END #endText
           ;
 
@@ -14,7 +14,8 @@ grammar ebnf;
           | SP* s=atom SP*                            #atomExpr
           ;
 
-    atom: word=WORD   #wordAtom
+    atom: word=RULE   #ruleAtom
+          | STR #strAtom
           | CHR  #chrAtom
           ;
 
@@ -25,6 +26,8 @@ grammar ebnf;
     END: 'EOF' ;
 
     CHR: '"' [a-zA-Z0-9_ ] '"';
+
+    STR: '"' [a-zA-Z][a-zA-Z0-9_ ]*[a-zA-Z0-9_] '"' ;
 
     ALT: '|' ;
 
@@ -38,7 +41,7 @@ grammar ebnf;
 
     OPT: '?' ;
 
-    WORD: [a-zA-Z][a-zA-Z0-9_ ]*[a-zA-Z0-9_] ;
+    RULE: [a-zA-Z][a-zA-Z0-9_ ]*[a-zA-Z0-9_] ;
 
     SP: ' ' ;
 

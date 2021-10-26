@@ -264,10 +264,13 @@ class EvalVisitor(ebnfVisitor):
     def visitAtomExpr(self, ctx):
         return self.visit(ctx.s)
         
-    def visitWordAtom(self, ctx):
+    def visitRuleAtom(self, ctx):
         return AtomNode(ctx.getText(), ctx)
 
     def visitChrAtom(self, ctx):
+        return AtomNode(ctx.getText(), None)
+
+    def visitStrAtom(self, ctx):
         return AtomNode(ctx.getText(), None)
 
     def visitParenExpr(self, ctx):
