@@ -25,12 +25,12 @@
 
 ## Сборка проекта
 1. Скачать ANTLR -- https://github.com/antlr/antlr4/blob/master/doc/getting-started.md
-2. Генерация парсера -- antlr4 -Dlanguage=Python3 -visitor ebnf.g4
-3. Передача тестовых файлов -- python3 visitor.py test.txt > res.txt  
+2. Генерация парсера -- ```antlr4 -Dlanguage=Python3 -visitor ebnf.g4```
+3. Передача тестовых файлов -- ```python3 visitor.py test.txt > res.txt```
 
 ## Задача участников
 
-### Вородьев Вячеслав
+### Воробьев Вячеслав
 
 ### Шеремеев Андрей
 
