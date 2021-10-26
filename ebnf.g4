@@ -27,7 +27,7 @@ grammar ebnf;
 
     CHR: '"' [a-zA-Z0-9_ ] '"';
 
-    STR: '"' [a-zA-Z][a-zA-Z0-9_ ]*[a-zA-Z0-9_] '"' ;
+    STR: '"' [a-zA-Z0-9_ ]* '"' ;
 
     ALT: '|' ;
 
