@@ -287,6 +287,34 @@ class EvalVisitor(ebnfVisitor):
         right = self.visit(ctx.right)
         return ConcatNode(ctx.getText(), left, right)
 
+
+def check_comment_errors(stream, inpFile):
+    strings = inpFile.splitlines()
+    balance = 0
+    tokens = []
+    stream.fill()
+    last_open = None
+    for token in stream.tokens:
+        if token.channel == 2:
+            if token.type == ebnfLexer.OpenBlockComment:
+                balance += 1
+                last_open = token
+            elif token.type == ebnfLexer.CloseBlockComment:
+                balance -= 1
+            elif balance == 0:
+                print_error_msg(token.line, token.column, strings[token.line-1], msg="Unknown symbol")
+                exit(1)
+        if balance < 0:
+            print_error_msg(token.line, token.column, strings[token.line-1], msg="Comment is closed, but wasn't opened")
+            exit(1)
+        if balance == 0:
+            tokens.append(token)
+    if balance > 0:
+            print_error_msg(last_open.line, last_open.column, strings[last_open.line-1], msg="Comment wasn't closed")
+            exit(1)
+    return tokens
+
+
 class CommentShifter(ebnfListener):
     def __init__(self, tokens:CommonTokenStream):
         super().__init__()
@@ -317,9 +345,11 @@ def main():
         sys.exit(1)
 
     lexer = ebnfLexer(InputStream(input))
-    lexer.removeErrorListeners()
-    lexer.addErrorListener(MyErrorListener(sys.argv[1], input))
+    tokens = check_comment_errors(CommonTokenStream(lexer), input)
+    lexer = ebnfLexer(InputStream(input))
     stream = CommonTokenStream(lexer)
+    stream.fill()
+    stream.tokens = tokens
     parser = ebnfParser(stream)
     parser.removeErrorListeners()
     parser.addErrorListener(MyErrorListener(sys.argv[1], input))

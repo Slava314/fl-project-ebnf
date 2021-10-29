@@ -1,0 +1,11 @@
+digit -> "1"|"2";
+%THIS IS A COMMENT
+    #{THIS IS ALSO A COMMENT
+    wefwef lwkemfm;kwef
+    #{ksd
+    fj}#
+    }#
+digit1 -> "1"|"2";
+#{ksd
+    fj}#
+EOF

@@ -19,7 +19,9 @@ grammar ebnf;
           | CHR  #chrAtom
           ;
 
-    BlockComment: ' '*'#{' .*? '}#' -> skip;
+    OpenBlockComment: ' '*'#{' -> channel(2);
+
+    CloseBlockComment: '}#'' '* -> channel(2);
 
     LineComment: ' '*'%' ~ [\r\n]* -> skip;
 
@@ -52,3 +54,5 @@ grammar ebnf;
     NEW_L: [\r\n]+;
 
     WS: [\t]+ -> skip ;
+
+    SYM: . -> channel(2);
